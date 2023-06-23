@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Carga de archivos</title>
+    <style>
+      /* Estilos CSS */
+      body {
+        font-family: Arial, sans-serif;
+      }
+      h1 {
+        text-align: center;
+      }
+      form {
+        text-align: center;
+        margin-top: 20px;
+      }
+      #file-info {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      .file-details {
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Carga de archivos</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="files[]" multiple /> <!-- Modificación para permitir múltiples archivos -->
+      <button type="submit">Cargar</button>
+    </form>
+
+    <div id="file-info"></div>
+
+    <script>
+      // Script para mostrar los detalles de los archivos cargados
+      const form = document.querySelector("form");
+      const fileInfoDiv = document.querySelector("#file-info");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const fileInfos = await response.json();
+          fileInfoDiv.innerHTML = "";
+
+          fileInfos.forEach((fileInfo) => {
+            const fileDetails = document.createElement("div");
+            fileDetails.classList.add("file-details");
+            fileDetails.innerHTML = `
+              <p><strong>Nombre:</strong> ${fileInfo.filename}</p>
+              <p><strong>Nombre original:</strong> ${fileInfo.originalname}</p>
+              <p><strong>Tamaño:</strong> ${fileInfo.size} bytes</p>
+              <p><strong>Tipo MIME:</strong> ${fileInfo.mimetype}</p>
+              <hr />
+            `;
+            fileInfoDiv.appendChild(fileDetails);
+          });
+        } else {
+          fileInfoDiv.innerHTML = "Error al cargar los archivos.";
+        }
+      });
+    </script>
+  </body>
+</html>
